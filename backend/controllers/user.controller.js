@@ -8,29 +8,9 @@ export const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;
          
-        if (!fullname){
+        if (!fullname || !email || !phoneNumber || !password || !role) {
             return res.status(400).json({
-                message: "Name is missing",
-                success: false
-            });
-        } else if(!email){
-            return res.status(400).json({
-                message: "Email is missing",
-                success: false
-            });
-        } else if(!phoneNumber){
-            return res.status(400).json({
-                message: "Phone Number is missing",
-                success: false
-            });
-        } else if(!password){
-            return res.status(400).json({
-                message: "Password is missing",
-                success: false
-            });
-        } else if(!role) {
-            return res.status(400).json({
-                message: "Role is missing",
+                message: "All fields are required except profile picture.",
                 success: false
             });
         }
@@ -61,7 +41,7 @@ export const register = async (req, res) => {
             password: hashedPassword,
             role,
             profile: {
-                profilePhoto: profilePhoto || '', // Use an empty string or default URL if no profile picture is provided
+                profilePhoto: profilePhoto || '', // Use an empty string if no profile picture is provided
             }
         });
 
@@ -77,6 +57,7 @@ export const register = async (req, res) => {
         });
     }
 };
+
 
 export const login = async (req, res) => {
     try {

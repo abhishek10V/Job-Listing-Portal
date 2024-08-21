@@ -17,10 +17,8 @@ export const registerCompany = async (req, res) => {
 
         if (file) {
             const fileUri = getDataUri(file);
-            if (fileUri && fileUri.content) {
-                const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-                logo = cloudResponse.secure_url;
-            }
+            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+            logo = cloudResponse.secure_url;
         }
 
         let company = await Company.findOne({ name: companyName });
@@ -34,7 +32,7 @@ export const registerCompany = async (req, res) => {
         company = await Company.create({
             name: companyName,
             userId: req.id,
-            logo: logo || "", // If no logo is provided, set it as an empty string or handle it as needed
+            logo: logo || "", // If no logo is provided, set it as an empty string
         });
 
         return res.status(201).json({
@@ -50,6 +48,7 @@ export const registerCompany = async (req, res) => {
         });
     }
 };
+
 
 export const getCompany = async (req, res) => {
     try {
