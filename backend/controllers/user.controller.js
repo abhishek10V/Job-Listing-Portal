@@ -13,7 +13,7 @@ export const register = async (req, res) => {
                 message: "Name is missing",
                 success: false
             });
-        }  else if(!email){
+        } else if(!email){
             return res.status(400).json({
                 message: "Email is missing",
                 success: false
@@ -30,21 +30,28 @@ export const register = async (req, res) => {
             });
         } else if(!role) {
             return res.status(400).json({
-                message: "Roleis missing",
+                message: "Role is missing",
                 success: false
             });
-        };
-        const file = req.file;
-        const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+        }
 
         const user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({
-                message: 'User already exist with this email.',
+                message: 'User already exists with this email.',
                 success: false,
-            })
+            });
         }
+
+        let profilePhoto = null;
+        const file = req.file;
+
+        if (file) {
+            const fileUri = getDataUri(file);
+            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+            profilePhoto = cloudResponse.secure_url;
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         await User.create({
@@ -53,8 +60,8 @@ export const register = async (req, res) => {
             phoneNumber,
             password: hashedPassword,
             role,
-            profile:{
-                profilePhoto:cloudResponse.secure_url,
+            profile: {
+                profilePhoto: profilePhoto || '', // Use an empty string or default URL if no profile picture is provided
             }
         });
 
@@ -64,8 +71,13 @@ export const register = async (req, res) => {
         });
     } catch (error) {
         console.log(error);
+        return res.status(500).json({
+            message: "Server error",
+            success: false
+        });
     }
-}
+};
+
 export const login = async (req, res) => {
     try {
         const { email, password, role } = req.body;
